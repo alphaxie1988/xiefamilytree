@@ -284,9 +284,11 @@ function PersonNode({
   const borderColor = isSelected ? '#E8C875' : hovered ? '#C9A84C' : '#7A5020'
 
   return (
+    /* Outer g: SVG position only — no CSS transform so animation doesn't override it */
+    <g transform={`translate(${node.x},${node.y})`}>
+    {/* Inner g: CSS animation + interactivity */}
     <g
       className="node-group"
-      transform={`translate(${node.x},${node.y})`}
       style={{ animationDelay: delay, cursor: canEdit ? 'pointer' : 'default' }}
       filter={filter}
       onClick={onClick}
@@ -352,6 +354,7 @@ function PersonNode({
           {data.position}
         </text>
       )}
+    </g>
     </g>
   )
 }
