@@ -253,7 +253,6 @@ function TreeLink({ link, index }: { link: LayoutLink; index: number }) {
       fill="none"
       stroke="var(--connector)"
       strokeWidth={1.5}
-      opacity={0.55}
       style={{ animationDelay: `${delay}s` }}
     />
   )
@@ -262,8 +261,6 @@ function TreeLink({ link, index }: { link: LayoutLink; index: number }) {
 /* ── Person Node ── */
 const HALF_W = NODE_W / 2
 const HALF_H = NODE_H / 2
-const CHAR_H = 18   // pixels per Chinese character at fontSize 16
-const CHAR_H_SM = 14 // for smaller fontSize
 
 function PersonNode({
   node, canEdit, isSelected, animIndex, onClick,
@@ -278,144 +275,138 @@ function PersonNode({
   const { data } = node
   const isDeceased = data.is_deceased
 
-  const delay = `${0.05 + animIndex * 0.02}s`
+  const delay = `${0.05 + animIndex * 0.018}s`
   const filter = isSelected ? 'url(#hover-glow)' : hovered ? 'url(#glow)' : 'url(#shadow)'
   const fill = isDeceased ? '#1E1025' : '#1A0800'
   const borderColor = isSelected ? '#E8C875' : hovered ? '#C9A84C' : '#7A5020'
 
   return (
-    /* Outer g: SVG position only — no CSS transform so animation doesn't override it */
+    /* Outer g: SVG position only — CSS animation must NOT be on this element */
     <g transform={`translate(${node.x},${node.y})`}>
-    {/* Inner g: CSS animation + interactivity */}
-    <g
-      className="node-group"
-      style={{ animationDelay: delay, cursor: canEdit ? 'pointer' : 'default' }}
-      filter={filter}
-      onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {/* Outer card */}
-      <rect
-        x={-HALF_W} y={-HALF_H}
-        width={NODE_W} height={NODE_H}
-        rx={3} ry={3}
-        fill={fill}
-        stroke={borderColor}
-        strokeWidth={isSelected ? 2 : 1.5}
-      />
-      {/* Inner fine border */}
-      <rect
-        x={-HALF_W + 4} y={-HALF_H + 4}
-        width={NODE_W - 8} height={NODE_H - 8}
-        rx={1}
-        fill="none"
-        stroke={isDeceased ? 'rgba(139,105,20,0.3)' : 'rgba(201,168,76,0.2)'}
-        strokeWidth={0.6}
-      />
+      {/* Inner g: CSS fade-in + interactivity */}
+      <g
+        className="node-group"
+        style={{ animationDelay: delay, cursor: canEdit ? 'pointer' : 'default' }}
+        filter={filter}
+        onClick={onClick}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+      >
+        {/* Card background */}
+        <rect
+          x={-HALF_W} y={-HALF_H}
+          width={NODE_W} height={NODE_H}
+          rx={3} ry={3}
+          fill={fill}
+          stroke={borderColor}
+          strokeWidth={isSelected ? 2 : 1.5}
+        />
+        {/* Inner fine border */}
+        <rect
+          x={-HALF_W + 4} y={-HALF_H + 4}
+          width={NODE_W - 8} height={NODE_H - 8}
+          rx={1}
+          fill="none"
+          stroke={isDeceased ? 'rgba(139,105,20,0.3)' : 'rgba(201,168,76,0.2)'}
+          strokeWidth={0.6}
+        />
+        {/* Top decorative rule */}
+        <line
+          x1={-HALF_W + 8} y1={-HALF_H + 11}
+          x2={HALF_W - 8}  y2={-HALF_H + 11}
+          stroke="rgba(201,168,76,0.35)" strokeWidth={0.5}
+        />
+        {/* Bottom decorative rule (above generation label) */}
+        <line
+          x1={-HALF_W + 8} y1={HALF_H - 15}
+          x2={HALF_W - 8}  y2={HALF_H - 15}
+          stroke="rgba(201,168,76,0.35)" strokeWidth={0.5}
+        />
 
-      {/* Top decorative line */}
-      <line
-        x1={-HALF_W + 8} y1={-HALF_H + 12}
-        x2={HALF_W - 8} y2={-HALF_H + 12}
-        stroke="rgba(201,168,76,0.3)" strokeWidth={0.5}
-      />
-      {/* Bottom decorative line */}
-      <line
-        x1={-HALF_W + 8} y1={HALF_H - 18}
-        x2={HALF_W - 8} y2={HALF_H - 18}
-        stroke="rgba(201,168,76,0.3)" strokeWidth={0.5}
-      />
+        {/* Horizontal text */}
+        <NodeText data={data} />
 
-      {/* Text columns */}
-      <NodeText data={data} />
+        {/* Deceased dagger */}
+        {isDeceased && (
+          <text
+            x={HALF_W - 6} y={-HALF_H + 9}
+            textAnchor="end" fontSize={7}
+            fill="rgba(180,150,100,0.55)"
+            fontFamily="Noto Serif SC, serif"
+          >†</text>
+        )}
 
-      {/* Deceased indicator */}
-      {isDeceased && (
-        <text
-          x={HALF_W - 5} y={-HALF_H + 9}
-          textAnchor="end"
-          fontSize={7}
-          fill="rgba(180,150,100,0.6)"
-          fontFamily="Noto Serif SC, serif"
-        >†</text>
-      )}
-
-      {/* Generation label (bottom) */}
-      {data.position && (
-        <text
-          x={0} y={HALF_H - 6}
-          textAnchor="middle"
-          fontSize={8}
-          fill="rgba(201,168,76,0.7)"
-          fontFamily="Noto Serif SC, serif"
-          letterSpacing="1"
-        >
-          {data.position}
-        </text>
-      )}
-    </g>
+        {/* Generation label */}
+        {data.position && (
+          <text
+            x={0} y={HALF_H - 5}
+            textAnchor="middle" fontSize={8}
+            fill="rgba(201,168,76,0.65)"
+            fontFamily="Noto Serif SC, serif"
+            letterSpacing="0.5"
+          >
+            {data.position}
+          </text>
+        )}
+      </g>
     </g>
   )
 }
 
-/* Renders vertical Chinese text columns inside a node */
+/* Horizontal text rows inside a node */
 function NodeText({ data }: { data: FamilyMember }) {
-  const hasSpouse1 = !!data.line2
-  const hasSpouse2 = !!data.line3
+  type Row = { text: string; fill: string; size: number }
+  const rows: Row[] = [
+    {
+      text: clip(data.line1, 11),
+      fill: data.line1 === '-' ? 'rgba(245,230,200,0.3)' : '#F5E6C8',
+      size: adaptSize(data.line1, 13),
+    },
+    ...(data.line2 ? [{ text: clip(data.line2, 13), fill: '#DAA520', size: adaptSize(data.line2, 10) }] : []),
+    ...(data.line3 ? [{ text: clip(data.line3, 13), fill: '#B8860B', size: adaptSize(data.line3, 9)  }] : []),
+  ]
 
-  // Determine column x positions (right to left in traditional style)
-  // Name always on the rightmost, spouse(s) to the left
-  let nameX = 0
-  let s1X = -20
-  let s2X = -38
-
-  if (hasSpouse1 && hasSpouse2) {
-    nameX = 22; s1X = 2; s2X = -18
-  } else if (hasSpouse1) {
-    nameX = 16; s1X = -10
-  } else {
-    nameX = 4
-  }
-
-  const textTop = -HALF_H + 18
-  const centerY = 0
+  // Stack rows top-down, centred in the node's text area
+  const GAP = 3
+  const totalH = rows.reduce((s, r) => s + r.size, 0) + GAP * (rows.length - 1)
+  let y = -HALF_H + 14 + rows[0].size  // top-pad + first baseline
 
   return (
     <>
-      <VerticalChars
-        text={data.line1}
-        x={nameX}
-        centerY={centerY - 6}
-        fontSize={15}
-        fill={data.line1 === '-' ? 'rgba(245,230,200,0.3)' : '#F5E6C8'}
-        maxH={NODE_H - 36}
-        topY={textTop}
-      />
-      {hasSpouse1 && (
-        <VerticalChars
-          text={data.line2!}
-          x={s1X}
-          centerY={centerY - 6}
-          fontSize={12}
-          fill="#DAA520"
-          maxH={NODE_H - 36}
-          topY={textTop}
-        />
-      )}
-      {hasSpouse2 && (
-        <VerticalChars
-          text={data.line3!}
-          x={s2X}
-          centerY={centerY - 6}
-          fontSize={11}
-          fill="#B8860B"
-          maxH={NODE_H - 36}
-          topY={textTop}
-        />
-      )}
+      {rows.map((row, i) => {
+        const baseline = i === 0 ? y : (y += GAP + row.size, y)
+        return (
+          <text
+            key={i}
+            x={0}
+            y={baseline}
+            textAnchor="middle"
+            fontSize={row.size}
+            fill={row.fill}
+            fontFamily="Noto Serif SC, serif"
+            fontWeight={i === 0 ? '500' : '300'}
+          >
+            {row.text}
+          </text>
+        )
+      })}
     </>
   )
+}
+
+/** Truncate with ellipsis */
+function clip(text: string, max: number): string {
+  return text.length > max ? text.slice(0, max - 1) + '…' : text
+}
+
+/** Shrink font if text is too wide for the node */
+function adaptSize(text: string, base: number): number {
+  // rough px width: CJK char ≈ base, Latin/digit ≈ base * 0.6
+  const est = text.split('').reduce((w, c) =>
+    w + (/[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]/.test(c) ? base : base * 0.6), 0)
+  const maxW = NODE_W - 14
+  if (est <= maxW) return base
+  return Math.max(7, Math.floor(base * maxW / est))
 }
 
 function VerticalChars({
