@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: '許氏族譜 | Xu Family Genealogy',
-  description: '許氏世系圖 — Xu Clan Family Tree',
+  title: '谢氏族譜 | Xie Family Genealogy',
+  description: '谢氏世系圖 — Xie Clan Family Tree',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -40,7 +40,7 @@ export function Header({ user, canEdit }: Props) {
             <rect x="4" y="4" width="36" height="36" rx="2"
               fill="none" stroke="rgba(201,168,76,0.4)" strokeWidth="0.8"/>
             <text x="22" y="19" textAnchor="middle" fontSize="11"
-              fill="#F5E6C8" fontFamily="Noto Serif SC,serif" fontWeight="600">許氏</text>
+              fill="#F5E6C8" fontFamily="Noto Serif SC,serif" fontWeight="600">谢氏</text>
             <text x="22" y="34" textAnchor="middle" fontSize="10"
               fill="#F5E6C8" fontFamily="Noto Serif SC,serif">族譜</text>
           </svg>

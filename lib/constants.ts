@@ -4,8 +4,8 @@ export const AUTHORIZED_EDITORS: string[] = [
   // Add more authorized editors here
 ]
 
-export const SITE_TITLE_ZH = '許氏族譜'
-export const SITE_TITLE_EN = 'Xu Family Genealogy'
+export const SITE_TITLE_ZH = '谢氏族譜'
+export const SITE_TITLE_EN = 'Xie Family Genealogy'
 export const SITE_SUBTITLE_ZH = '世系圖'
 export const SITE_SUBTITLE_EN = 'Family Tree'
 
