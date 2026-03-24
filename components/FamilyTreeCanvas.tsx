@@ -444,8 +444,8 @@ function NodeText({ data, T }: { data: FamilyMember; T: Theme }) {
 
   const rows: Row[] = [
     ...makeRows(data.line1, data.line1 === '-' ? `${T.text1}33` : T.text1, T.textDate, '700'),
-    ...makeRows(data.line2, T.text2, T.textDate, '700'),
-    ...makeRows(data.line3, T.text3, T.textDate, '700'),
+    ...makeRows(data.line2, T.text1, T.textDate, '700'),
+    ...makeRows(data.line3, T.text1, T.textDate, '700'),
   ]
 
   const GAP = 2
