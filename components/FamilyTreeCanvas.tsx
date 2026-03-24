@@ -396,8 +396,8 @@ function NodeText({ data, T }: { data: FamilyMember; T: Theme }) {
   function makeRows(raw: string | null, fill: string, dateColor: string): Row[] {
     if (!raw) return []
     const [main, paren] = splitAtParen(raw)
-    const rows: Row[] = [{ text: clip(main, 13), fill, size: adaptSize(main, 12) }]
-    if (paren) rows.push({ text: clip(paren, 15), fill: dateColor, size: 9 })
+    const rows: Row[] = [{ text: clip(main, 13), fill, size: adaptSize(main, 14) }]
+    if (paren) rows.push({ text: clip(paren, 15), fill: dateColor, size: 11 })
     return rows
   }
 
@@ -408,7 +408,7 @@ function NodeText({ data, T }: { data: FamilyMember; T: Theme }) {
   ]
 
   const GAP = 2
-  let y = -HALF_H + 16 + (rows[0]?.size ?? 12)
+  let y = -HALF_H + 16 + (rows[0]?.size ?? 14)
 
   return (
     <>
@@ -422,7 +422,7 @@ function NodeText({ data, T }: { data: FamilyMember; T: Theme }) {
             fontSize={row.size}
             fill={row.fill}
             fontFamily="Noto Serif SC, Inter, sans-serif"
-            fontWeight={i === 0 ? '500' : '400'}
+            fontWeight={i === 0 ? '700' : '500'}
           >
             {row.text}
           </text>

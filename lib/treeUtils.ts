@@ -87,6 +87,45 @@ export function computeLayout(members: FamilyMember[]): {
     })
   })
 
+  // Handle orphan nodes: members not reachable from the main root
+  // but whose children ARE in the tree (e.g. second parent with no ancestors)
+  const visitedIds = new Set(nodes.map(n => n.data.id))
+  members.filter(m => !visitedIds.has(m.id)).forEach(orphan => {
+    const presentChildren = (orphan.refs ?? [])
+      .map(id => nodeById.get(id))
+      .filter((n): n is LayoutNode => n !== undefined)
+
+    if (presentChildren.length === 0) return // completely isolated, skip
+
+    const firstChild = presentChildren[0]
+    const orphanDepth = firstChild.depth - 1
+    const orphanY = firstChild.y - (NODE_H + GAP_Y)
+
+    // Place to the right of all nodes at the same depth level
+    const nodesAtDepth = nodes.filter(n => n.depth === orphanDepth)
+    const maxX = nodesAtDepth.length > 0
+      ? Math.max(...nodesAtDepth.map(n => n.x))
+      : firstChild.x
+    const orphanX = maxX + NODE_W + GAP_X * 4
+
+    const orphanNode: LayoutNode = {
+      x: orphanX,
+      y: orphanY,
+      data: orphan as FamilyMember,
+      depth: orphanDepth,
+      parent: null,
+      children: [],
+    }
+
+    nodes.push(orphanNode)
+    nodeById.set(orphan.id, orphanNode)
+
+    presentChildren.forEach(child => {
+      orphanNode.children.push(child)
+      links.push({ source: orphanNode, target: child })
+    })
+  })
+
   return { nodes, links }
 }
 
