@@ -210,13 +210,15 @@ export function FamilyTreeCanvas({ members: initialMembers, canEdit, isDark }: P
         </defs>
 
         <g ref={gRef}>
-          {/* Group links by parent so each parent draws one stem + one bar */}
+          {/* Group links by parent — skip links where child has hide_line set */}
           {Object.values(
-            links.reduce<Record<number, LayoutLink[]>>((acc, link) => {
-              const pid = link.source.data.id
-              ;(acc[pid] ??= []).push(link)
-              return acc
-            }, {})
+            links
+              .filter(link => !link.target.data.hide_line)
+              .reduce<Record<number, LayoutLink[]>>((acc, link) => {
+                const pid = link.source.data.id
+                ;(acc[pid] ??= []).push(link)
+                return acc
+              }, {})
           ).map((group, gi) => (
             <ParentConnector key={`pc-${group[0].source.data.id}`} links={group} groupIndex={gi} color={T.connector} />
           ))}
@@ -368,6 +370,11 @@ function PersonNode({
 
         <NodeText data={data} T={T} />
 
+        {/* Notes tooltip on hover */}
+        {hovered && data.notes && (
+          <NotesTooltip notes={data.notes} T={T} />
+        )}
+
         {/* Generation label (auto-computed from depth) */}
         <text
           x={0} y={HALF_H - 5}
@@ -429,6 +436,48 @@ function NodeText({ data, T }: { data: FamilyMember; T: Theme }) {
         )
       })}
     </>
+  )
+}
+
+function NotesTooltip({ notes, T }: { notes: string; T: Theme }) {
+  const MAX_CHARS = 24
+  const raw = notes.split('\n').flatMap(l => {
+    const chunks: string[] = []
+    for (let i = 0; i < l.length; i += MAX_CHARS) chunks.push(l.slice(i, i + MAX_CHARS))
+    return chunks.length ? chunks : ['']
+  }).slice(0, 5)
+
+  const lineH = 14
+  const pad = 8
+  const h = raw.length * lineH + pad * 2
+  const w = 160
+
+  return (
+    <g transform={`translate(0, ${-HALF_H - h - 6})`} style={{ pointerEvents: 'none' }}>
+      <rect
+        x={-w / 2} y={0} width={w} height={h} rx={6}
+        fill={T.nodeFill} stroke={T.borderSel} strokeWidth={1}
+        style={{ filter: 'drop-shadow(0 3px 8px rgba(0,0,0,0.35))' }}
+      />
+      {/* Arrow pointing down */}
+      <polygon
+        points={`-5,${h} 5,${h} 0,${h + 6}`}
+        fill={T.nodeFill} stroke={T.borderSel} strokeWidth={1}
+        strokeLinejoin="round"
+      />
+      <polygon points={`-4,${h - 1} 4,${h - 1} 0,${h + 5}`} fill={T.nodeFill} />
+      {raw.map((line, i) => (
+        <text
+          key={i}
+          x={0} y={pad + lineH * (i + 1) - 3}
+          textAnchor="middle" fontSize={10}
+          fill={T.text2}
+          fontFamily="Noto Serif SC, Inter, sans-serif"
+        >
+          {line}
+        </text>
+      ))}
+    </g>
   )
 }
 

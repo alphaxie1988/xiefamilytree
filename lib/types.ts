@@ -6,6 +6,7 @@ export interface FamilyMember {
   position?: string | null // generation label — computed from depth, not edited
   refs: number[] | null   // children IDs
   notes: string | null
+  hide_line?: boolean | null  // hide connector line to this node's parent
   created_at?: string
   updated_at?: string
 }

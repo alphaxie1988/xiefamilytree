@@ -23,6 +23,7 @@ export function EditModal({ member, canDelete, isDark, onClose, onUpdate, onAddC
   const [line2, setLine2] = useState(member.line2 ?? '')
   const [line3, setLine3] = useState(member.line3 ?? '')
   const [notes, setNotes] = useState(member.notes ?? '')
+  const [hideLine, setHideLine] = useState(member.hide_line ?? false)
 
   const [cLine1, setCLine1] = useState('')
   const [cLine2, setCLine2] = useState('')
@@ -61,6 +62,7 @@ export function EditModal({ member, canDelete, isDark, onClose, onUpdate, onAddC
       line2: line2.trim() || null,
       line3: line3.trim() || null,
       notes: notes.trim() || null,
+      hide_line: hideLine,
     })
     setSaving(false)
     onClose()
@@ -121,6 +123,15 @@ export function EditModal({ member, canDelete, isDark, onClose, onUpdate, onAddC
               <Field label="配偶 Spouse 1" value={line2} onChange={setLine2} placeholder="e.g. 陳氏" isDark={isDark} D={D} />
               <Field label="配偶 Spouse 2" value={line3} onChange={setLine3} placeholder="optional" isDark={isDark} D={D} />
               <Field label="備註 Notes" value={notes} onChange={setNotes} placeholder="optional notes" multiline isDark={isDark} D={D} />
+              <label className="flex items-center gap-2 cursor-pointer select-none pt-1">
+                <input
+                  type="checkbox"
+                  checked={hideLine}
+                  onChange={e => setHideLine(e.target.checked)}
+                  className="w-4 h-4 accent-amber-500"
+                />
+                <span className={`text-xs font-chinese ${D.label}`}>隱藏連線 Hide line to parent</span>
+              </label>
             </>
           ) : (
             <>
