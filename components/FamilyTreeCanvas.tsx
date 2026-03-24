@@ -291,8 +291,9 @@ function ParentConnector({ links, groupIndex, color }: { links: LayoutLink[]; gr
   const elbowY = (stemY + dropY) / 2                 // halfway
 
   const xs       = visibleChildren.map(c => c.x)
-  const barLeft  = Math.min(...xs)
-  const barRight = Math.max(...xs)
+  // Always include parent.x so the bar connects the stem to any offset child
+  const barLeft  = Math.min(...xs, parent.x)
+  const barRight = Math.max(...xs, parent.x)
 
   const delay = `${0.1 + groupIndex * 0.03}s`
   const props = { fill: 'none', stroke: color, strokeWidth: 2, className: 'tree-link', style: { animationDelay: delay } }
@@ -301,7 +302,7 @@ function ParentConnector({ links, groupIndex, color }: { links: LayoutLink[]; gr
     <g>
       {/* Single stem down from parent */}
       <line {...props} x1={parent.x} y1={stemY} x2={parent.x} y2={elbowY} />
-      {/* Horizontal bar (only if more than one visible child) */}
+      {/* Horizontal bar — spans from parent.x to all visible children */}
       {barLeft < barRight && (
         <line {...props} x1={barLeft} y1={elbowY} x2={barRight} y2={elbowY} />
       )}
