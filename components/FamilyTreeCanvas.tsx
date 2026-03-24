@@ -210,15 +210,13 @@ export function FamilyTreeCanvas({ members: initialMembers, canEdit, isDark }: P
         </defs>
 
         <g ref={gRef}>
-          {/* Group links by parent — skip links where child has hide_line set */}
+          {/* Group links by parent so each parent draws one stem + one bar */}
           {Object.values(
-            links
-              .filter(link => !link.target.data.hide_line)
-              .reduce<Record<number, LayoutLink[]>>((acc, link) => {
-                const pid = link.source.data.id
-                ;(acc[pid] ??= []).push(link)
-                return acc
-              }, {})
+            links.reduce<Record<number, LayoutLink[]>>((acc, link) => {
+              const pid = link.source.data.id
+              ;(acc[pid] ??= []).push(link)
+              return acc
+            }, {})
           ).map((group, gi) => (
             <ParentConnector key={`pc-${group[0].source.data.id}`} links={group} groupIndex={gi} color={T.connector} />
           ))}
@@ -282,13 +280,17 @@ export function FamilyTreeCanvas({ members: initialMembers, canEdit, isDark }: P
 /* ── Parent Connector — one stem + bar + drops per sibling group ── */
 function ParentConnector({ links, groupIndex, color }: { links: LayoutLink[]; groupIndex: number; color: string }) {
   const parent = links[0].source
-  const children = links.map(l => l.target)
+  const allChildren = links.map(l => l.target)
+  // Only draw connectors for children that don't have hide_line set
+  const visibleChildren = allChildren.filter(c => !c.data.hide_line)
+
+  if (visibleChildren.length === 0) return null
 
   const stemY  = parent.y + NODE_H / 2               // bottom of parent card
-  const dropY  = children[0].y - NODE_H / 2          // top of child cards
+  const dropY  = visibleChildren[0].y - NODE_H / 2   // top of child cards
   const elbowY = (stemY + dropY) / 2                 // halfway
 
-  const xs       = children.map(c => c.x)
+  const xs       = visibleChildren.map(c => c.x)
   const barLeft  = Math.min(...xs)
   const barRight = Math.max(...xs)
 
@@ -299,12 +301,12 @@ function ParentConnector({ links, groupIndex, color }: { links: LayoutLink[]; gr
     <g>
       {/* Single stem down from parent */}
       <line {...props} x1={parent.x} y1={stemY} x2={parent.x} y2={elbowY} />
-      {/* Horizontal bar (only if more than one child) */}
+      {/* Horizontal bar (only if more than one visible child) */}
       {barLeft < barRight && (
         <line {...props} x1={barLeft} y1={elbowY} x2={barRight} y2={elbowY} />
       )}
-      {/* Drop from bar to each child */}
-      {children.map(child => (
+      {/* Drop from bar to each visible child */}
+      {visibleChildren.map(child => (
         <line key={child.data.id} {...props} x1={child.x} y1={elbowY} x2={child.x} y2={dropY} />
       ))}
     </g>
