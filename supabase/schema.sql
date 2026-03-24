@@ -42,7 +42,29 @@ CREATE POLICY "public read"
   USING (true);
 
 -- Only authenticated users can write
--- (Application layer further restricts to AUTHORIZED_EDITORS)
+-- (Application layer further restricts to admins table)
 CREATE POLICY "auth write"
   ON family_members FOR ALL
+  USING (auth.role() = 'authenticated');
+
+-- ============================================================
+-- Admins table — stores authorized editor emails
+-- ============================================================
+DROP TABLE IF EXISTS admins;
+
+CREATE TABLE admins (
+  email TEXT PRIMARY KEY
+);
+
+ALTER TABLE admins ENABLE ROW LEVEL SECURITY;
+
+-- Anyone can read (needed to check authorization with anon key)
+CREATE POLICY "public read"
+  ON admins FOR SELECT
+  USING (true);
+
+-- Only authenticated users can write
+-- (Application layer further restricts to existing admins)
+CREATE POLICY "auth write"
+  ON admins FOR ALL
   USING (auth.role() = 'authenticated');

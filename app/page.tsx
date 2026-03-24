@@ -9,7 +9,7 @@ export default async function HomePage() {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  const canEdit = isAuthorizedEditor(user?.email)
+  const canEdit = await isAuthorizedEditor(user?.email, supabase)
 
   const { data: members, error } = await supabase
     .from('family_members')

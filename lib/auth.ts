@@ -1,6 +1,14 @@
-import { AUTHORIZED_EDITORS } from './constants'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
-export function isAuthorizedEditor(email: string | undefined | null): boolean {
+export async function isAuthorizedEditor(
+  email: string | undefined | null,
+  supabase: SupabaseClient
+): Promise<boolean> {
   if (!email) return false
-  return AUTHORIZED_EDITORS.map(e => e.toLowerCase()).includes(email.toLowerCase())
+  const { data } = await supabase
+    .from('admins')
+    .select('email')
+    .eq('email', email.toLowerCase())
+    .maybeSingle()
+  return data !== null
 }

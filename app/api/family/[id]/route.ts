@@ -9,7 +9,7 @@ export async function PATCH(
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user || !isAuthorizedEditor(user.email)) {
+  if (!user || !await isAuthorizedEditor(user.email, supabase)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
 
@@ -34,7 +34,7 @@ export async function DELETE(
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user || !isAuthorizedEditor(user.email)) {
+  if (!user || !await isAuthorizedEditor(user.email, supabase)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
 

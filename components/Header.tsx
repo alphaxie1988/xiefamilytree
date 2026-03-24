@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { SITE_TITLE_ZH, SITE_TITLE_EN } from '@/lib/constants'
 import type { User } from '@supabase/supabase-js'
-import { SearchIcon, SunIcon, MoonIcon, ChevronLeftIcon, ChevronRightIcon, PencilIcon } from './Icons'
+import { SearchIcon, SunIcon, MoonIcon, ChevronLeftIcon, ChevronRightIcon, PencilIcon, UsersIcon } from './Icons'
+import { AdminModal } from './AdminModal'
 
 interface Props {
   user: User | null
@@ -22,6 +23,7 @@ interface Props {
 
 export function Header({ user, canEdit, isDark, mounted, onToggleTheme, query, onQueryChange, matchCount, matchIndex, onPrev, onNext }: Props) {
   const [loading, setLoading] = useState(false)
+  const [showAdminModal, setShowAdminModal] = useState(false)
   const supabase = createClient()
 
   const text   = isDark ? '#F9FAFB' : '#0F172A'
@@ -81,6 +83,7 @@ export function Header({ user, canEdit, isDark, mounted, onToggleTheme, query, o
           <div
             className="flex items-center justify-center w-8 h-8 rounded-lg"
             style={{ background: `${accent}18`, border: `1px solid ${accent}30` }}
+            title="v1.0.1"
           >
             <span className="font-chinese font-semibold text-sm leading-none" style={{ color: accent }}>谢</span>
           </div>
@@ -102,12 +105,25 @@ export function Header({ user, canEdit, isDark, mounted, onToggleTheme, query, o
         {/* Right */}
         <div className="flex items-center gap-2">
         {canEdit && (
-          <span
-            className="text-xs font-chinese rounded-md px-2 py-1 hidden sm:inline"
-            style={{ color: accent, background: `${accent}10`, border: `1px solid ${accent}25` }}
-          >
-            <PencilIcon color={accent} /> 編輯模式
-          </span>
+          <>
+            <span
+              className="text-xs font-chinese rounded-md px-2 py-1 hidden sm:inline"
+              style={{ color: accent, background: `${accent}10`, border: `1px solid ${accent}25` }}
+            >
+              <PencilIcon color={accent} /> 編輯模式
+            </span>
+            <button
+              onClick={() => setShowAdminModal(true)}
+              className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
+              style={{
+                background: `${accent}18`,
+                border: `1px solid ${accent}50`,
+              }}
+              title="Manage admins"
+            >
+              <UsersIcon color={accent} />
+            </button>
+          </>
         )}
 
         {/* Theme toggle — only after theme is known to avoid flicker */}
@@ -158,6 +174,14 @@ export function Header({ user, canEdit, isDark, mounted, onToggleTheme, query, o
         <div className="md:hidden px-4 pb-2.5">
           {searchBar}
         </div>
+      )}
+
+      {showAdminModal && user && (
+        <AdminModal
+          isDark={isDark}
+          currentUserEmail={user.email ?? ''}
+          onClose={() => setShowAdminModal(false)}
+        />
       )}
     </header>
   )
