@@ -138,7 +138,12 @@ export function Header({ user, canEdit, isDark, mounted, onToggleTheme, query, o
           <button
             onClick={signIn}
             disabled={loading}
-            className="btn-primary text-sm flex items-center gap-1.5"
+            className="text-sm flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-opacity hover:opacity-80"
+            style={{
+              background: 'rgba(217, 119, 6, 0.094)',
+              border: '1px solid rgba(217, 119, 6, 0.19)',
+              color: accent,
+            }}
           >
             <GoogleIcon />
             <span>Sign In</span>
