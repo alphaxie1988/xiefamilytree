@@ -8,11 +8,17 @@ import type { User } from '@supabase/supabase-js'
 interface Props {
   user: User | null
   canEdit: boolean
+  isDark: boolean
+  onToggleTheme: () => void
 }
 
-export function Header({ user, canEdit }: Props) {
+export function Header({ user, canEdit, isDark, onToggleTheme }: Props) {
   const [loading, setLoading] = useState(false)
   const supabase = createClient()
+
+  const text   = isDark ? '#F9FAFB' : '#0F172A'
+  const muted  = isDark ? '#6B7280' : '#94A3B8'
+  const accent = isDark ? '#F59E0B' : '#D97706'
 
   async function signIn() {
     setLoading(true)
@@ -29,60 +35,65 @@ export function Header({ user, canEdit }: Props) {
   }
 
   return (
-    <header className="site-header flex items-center justify-between px-6 py-3 shrink-0">
-      {/* Left: Seal + Title */}
-      <div className="flex items-center gap-4">
-        {/* Traditional seal */}
-        <div className="relative">
-          <svg width="44" height="44" viewBox="0 0 44 44">
-            <rect x="1" y="1" width="42" height="42" rx="4"
-              fill="#8B1A1A" stroke="#C9A84C" strokeWidth="1.5"/>
-            <rect x="4" y="4" width="36" height="36" rx="2"
-              fill="none" stroke="rgba(201,168,76,0.4)" strokeWidth="0.8"/>
-            <text x="22" y="19" textAnchor="middle" fontSize="11"
-              fill="#F5E6C8" fontFamily="Noto Serif SC,serif" fontWeight="600">谢氏</text>
-            <text x="22" y="34" textAnchor="middle" fontSize="10"
-              fill="#F5E6C8" fontFamily="Noto Serif SC,serif">族譜</text>
-          </svg>
+    <header className="site-header flex items-center justify-between px-4 py-2.5 shrink-0">
+      {/* Left: Mark + Title */}
+      <div className="flex items-center gap-3">
+        <div
+          className="flex items-center justify-center w-8 h-8 rounded-lg"
+          style={{ background: `${accent}18`, border: `1px solid ${accent}30` }}
+        >
+          <span className="font-chinese font-semibold text-sm leading-none" style={{ color: accent }}>谢</span>
         </div>
-
         <div>
-          <h1 className="text-gold font-chinese font-semibold text-xl leading-tight tracking-wider">
+          <h1 className="font-chinese font-semibold text-base leading-tight tracking-wide" style={{ color: text }}>
             {SITE_TITLE_ZH}
           </h1>
-          <p className="text-gold/50 text-xs tracking-widest">{SITE_TITLE_EN}</p>
+          <p className="text-xs tracking-widest" style={{ color: muted }}>{SITE_TITLE_EN}</p>
         </div>
       </div>
 
-      {/* Right: status + auth */}
-      <div className="flex items-center gap-3">
+      {/* Right */}
+      <div className="flex items-center gap-2">
         {canEdit && (
-          <span className="text-xs text-gold/70 font-chinese border border-gold/30 rounded px-2 py-1">
-            ✎ 編輯模式 Edit Mode
+          <span
+            className="text-xs font-chinese rounded-md px-2 py-1 hidden sm:inline"
+            style={{ color: accent, background: `${accent}10`, border: `1px solid ${accent}25` }}
+          >
+            ✎ 編輯模式
           </span>
         )}
 
+        {/* Theme toggle */}
+        <button
+          onClick={onToggleTheme}
+          className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
+          style={{
+            background: isDark ? '#1F2937' : '#F1F5F9',
+            border: `1px solid ${isDark ? '#374151' : '#E2E8F0'}`,
+            color: isDark ? '#9CA3AF' : '#64748B',
+          }}
+          title={isDark ? 'Light mode' : 'Dark mode'}
+        >
+          {isDark ? '☀' : '🌙'}
+        </button>
+
         {user ? (
-          <div className="flex items-center gap-3">
-            <span className="text-gold/60 text-sm font-chinese hidden sm:block">
+          <div className="flex items-center gap-2">
+            <span className="text-sm hidden sm:block" style={{ color: muted }}>
               {user.email}
             </span>
-            <button
-              onClick={signOut}
-              disabled={loading}
-              className="btn-ghost text-sm"
-            >
-              登出 Sign Out
+            <button onClick={signOut} disabled={loading} className="btn-ghost text-sm">
+              登出
             </button>
           </div>
         ) : (
           <button
             onClick={signIn}
             disabled={loading}
-            className="btn-primary text-sm flex items-center gap-2"
+            className="btn-primary text-sm flex items-center gap-1.5"
           >
             <GoogleIcon />
-            <span className="font-chinese">登入 Sign In</span>
+            <span>Sign In</span>
           </button>
         )}
       </div>
@@ -92,7 +103,7 @@ export function Header({ user, canEdit }: Props) {
 
 function GoogleIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24">
+    <svg width="14" height="14" viewBox="0 0 24 24">
       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
       <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
       <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>

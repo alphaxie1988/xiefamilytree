@@ -91,7 +91,7 @@ export function computeLayout(members: FamilyMember[]): {
 }
 
 /** Chinese generation names → index */
-const GEN_NAMES = [
+export const GEN_NAMES = [
   '一世','二世','三世','四世','五世','六世','七世','八世','九世','十世',
   '十一世','十二世','十三世','十四世','十五世','十六世','十七世','十八世',
   '十九世','二十世','二十一世','二十二世','二十三世','二十四世','二十五世',
