@@ -6,6 +6,16 @@ import type { FamilyMember, FamilyMemberUpdate, FamilyMemberInsert } from '@/lib
 import { computeLayout, GEN_NAMES, type LayoutNode, type LayoutLink, NODE_W, NODE_H } from '@/lib/treeUtils'
 import { EditModal } from './EditModal'
 
+function getHiddenIds(members: FamilyMember[], collapsedIds: Set<number>): Set<number> {
+  const hidden = new Set<number>()
+  function addDesc(id: number) {
+    const m = members.find(x => x.id === id)
+    m?.refs?.forEach(r => { if (!hidden.has(r)) { hidden.add(r); addDesc(r) } })
+  }
+  collapsedIds.forEach(id => addDesc(id))
+  return hidden
+}
+
 interface Props {
   members: FamilyMember[]
   canEdit: boolean
@@ -68,8 +78,16 @@ export function FamilyTreeCanvas({ members: initialMembers, canEdit, isDark, foc
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
+  const [collapsedIds, setCollapsedIds] = useState<Set<number>>(new Set())
+  const [leavingNodes, setLeavingNodes] = useState<LayoutNode[]>([])
+  const prevNodesRef = useRef<LayoutNode[]>([])
 
-  const { nodes, links } = useMemo(() => computeLayout(members), [members])
+  const visibleMembers = useMemo(() => {
+    const hidden = getHiddenIds(members, collapsedIds)
+    return members.filter(m => !hidden.has(m.id))
+  }, [members, collapsedIds])
+
+  const { nodes, links } = useMemo(() => computeLayout(visibleMembers), [visibleMembers])
 
   useEffect(() => {
     const svg = svgRef.current
@@ -87,6 +105,26 @@ export function FamilyTreeCanvas({ members: initialMembers, canEdit, isDark, foc
     d3.select(svg).call(zoom.transform, d3.zoomIdentity.translate(w / 2, h * 0.08).scale(0.55))
 
     return () => { d3.select(svg).on('.zoom', null) }
+  }, [])
+
+  // Track leaving nodes for collapse exit animation
+  useEffect(() => {
+    const newIds = new Set(nodes.map(n => n.data.id))
+    const leaving = prevNodesRef.current.filter(n => !newIds.has(n.data.id))
+    prevNodesRef.current = nodes
+    if (leaving.length === 0) return
+    setLeavingNodes(leaving)
+    const t = setTimeout(() => setLeavingNodes([]), 380)
+    return () => clearTimeout(t)
+  }, [nodes])
+
+  const toggleCollapse = useCallback((id: number) => {
+    setCollapsedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
   }, [])
 
   // Pan & zoom to focused search result
@@ -236,6 +274,16 @@ export function FamilyTreeCanvas({ members: initialMembers, canEdit, isDark, foc
           ).map((group, gi) => (
             <ParentConnector key={`pc-${group[0].source.data.id}`} links={group} groupIndex={gi} color={T.connector} />
           ))}
+          {/* Leaving nodes — collapse exit animation */}
+          {leavingNodes.map(node => (
+            <g key={`leaving-${node.data.id}`} style={{ transform: `translate(${node.x}px, ${node.y}px)` }}>
+              <g className="node-leaving">
+                <rect x={-HALF_W} y={-HALF_H} width={NODE_W} height={NODE_H} rx={6} fill={T.nodeFill} stroke={T.border} />
+                <rect x={-HALF_W + 8} y={-HALF_H + 5} width={NODE_W - 16} height={2.5} rx={1.5} fill={T.accentBar} />
+              </g>
+            </g>
+          ))}
+
           {nodes.map((node, i) => (
             <PersonNode
               key={node.data.id}
@@ -246,6 +294,9 @@ export function FamilyTreeCanvas({ members: initialMembers, canEdit, isDark, foc
               isFocused={focusNodeId === node.data.id}
               animIndex={i}
               onClick={() => { if (canEdit) setSelectedId(node.data.id) }}
+              hasChildren={(node.data.refs?.length ?? 0) > 0}
+              isCollapsed={collapsedIds.has(node.data.id)}
+              onToggleCollapse={() => toggleCollapse(node.data.id)}
             />
           ))}
         </g>
@@ -339,6 +390,7 @@ type Theme = typeof DARK
 
 function PersonNode({
   node, T, canEdit, isSelected, isFocused, animIndex, onClick,
+  hasChildren, isCollapsed, onToggleCollapse,
 }: {
   node: LayoutNode
   T: Theme
@@ -347,6 +399,9 @@ function PersonNode({
   isFocused: boolean
   animIndex: number
   onClick: () => void
+  hasChildren: boolean
+  isCollapsed: boolean
+  onToggleCollapse: () => void
 }) {
   const [hovered, setHovered] = useState(false)
   const { data, depth } = node
@@ -357,7 +412,7 @@ function PersonNode({
   const filter      = isSelected ? 'url(#sel-glow)' : hovered ? 'url(#glow)' : 'url(#shadow)'
 
   return (
-    <g transform={`translate(${node.x},${node.y})`}>
+    <g style={{ transform: `translate(${node.x}px, ${node.y}px)`, transition: 'transform 0.45s cubic-bezier(0.16,1,0.3,1)' }}>
       <g
         className="node-group"
         style={{ animationDelay: `${0.05 + animIndex * 0.018}s`, cursor: canEdit ? 'pointer' : 'default' }}
@@ -420,6 +475,22 @@ function PersonNode({
           {genLabel}
         </text>
       </g>
+
+      {/* Collapse / expand toggle button */}
+      {hasChildren && (hovered || isCollapsed) && (
+        <g
+          transform={`translate(0, ${HALF_H + 2})`}
+          onClick={e => { e.stopPropagation(); onToggleCollapse() }}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          style={{ cursor: 'pointer' }}
+        >
+          <circle cx={0} cy={7} r={8} fill={T.nodeFill} stroke={isCollapsed ? T.accent : T.border} strokeWidth={1.5} />
+          <text x={0} y={11} textAnchor="middle" fontSize={11} fill={isCollapsed ? T.accent : T.text3} fontFamily="Inter, sans-serif" fontWeight="600">
+            {isCollapsed ? '+' : '−'}
+          </text>
+        </g>
+      )}
     </g>
   )
 }
