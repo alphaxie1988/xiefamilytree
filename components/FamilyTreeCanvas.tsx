@@ -30,7 +30,7 @@ const DARK = {
   textDate:        '#6B7280',
   genLabel:        'rgba(156,163,175,0.7)',
   genLabelSel:     'rgba(245,158,11,0.9)',
-  connector:       '#2D3748',
+  connector:       '#6B7280',
   glowColor:       '#F59E0B',
   shadowColor:     'rgba(0,0,0,0.6)',
 }
@@ -52,7 +52,7 @@ const LIGHT = {
   textDate:        '#94A3B8',
   genLabel:        'rgba(100,116,139,0.8)',
   genLabelSel:     'rgba(217,119,6,0.95)',
-  connector:       '#CBD5E1',
+  connector:       '#64748B',
   glowColor:       '#D97706',
   shadowColor:     'rgba(0,0,0,0.12)',
 }
@@ -291,7 +291,7 @@ function ParentConnector({ links, groupIndex, color }: { links: LayoutLink[]; gr
   const barRight = Math.max(...xs)
 
   const delay = `${0.1 + groupIndex * 0.03}s`
-  const props = { fill: 'none', stroke: color, strokeWidth: 1.5, className: 'tree-link', style: { animationDelay: delay } }
+  const props = { fill: 'none', stroke: color, strokeWidth: 2, className: 'tree-link', style: { animationDelay: delay } }
 
   return (
     <g>

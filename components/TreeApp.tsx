@@ -13,13 +13,13 @@ interface Props {
 }
 
 export function TreeApp({ members, canEdit, user }: Props) {
-  // Read from DOM — the blocking script in layout.tsx has already set
-  // html.theme-light or html.theme-dark before React runs, so this is correct
-  // on first render with no flash.
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window === 'undefined') return true
-    return !document.documentElement.classList.contains('theme-light')
-  })
+  const [mounted, setMounted] = useState(false)
+  const [isDark, setIsDark] = useState(true) // default until mounted
+
+  useEffect(() => {
+    setIsDark(!document.documentElement.classList.contains('theme-light'))
+    setMounted(true)
+  }, [])
 
   function toggleTheme() {
     setIsDark(prev => {
@@ -37,7 +37,7 @@ export function TreeApp({ members, canEdit, user }: Props) {
     <div className={`flex flex-col h-screen ${isDark ? 'theme-dark' : 'theme-light'}`}>
       <Header user={user} canEdit={canEdit} isDark={isDark} onToggleTheme={toggleTheme} />
       <main className="flex-1 relative overflow-hidden">
-        <FamilyTreeCanvas members={members} canEdit={canEdit} isDark={isDark} />
+        {mounted && <FamilyTreeCanvas members={members} canEdit={canEdit} isDark={isDark} />}
       </main>
     </div>
   )
