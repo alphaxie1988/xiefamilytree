@@ -10,6 +10,7 @@ interface Props {
   members: FamilyMember[]
   canEdit: boolean
   isDark: boolean
+  focusNodeId?: number | null
 }
 
 // Theme colour palettes for SVG elements
@@ -57,7 +58,7 @@ const LIGHT = {
   shadowColor:     'rgba(0,0,0,0.12)',
 }
 
-export function FamilyTreeCanvas({ members: initialMembers, canEdit, isDark }: Props) {
+export function FamilyTreeCanvas({ members: initialMembers, canEdit, isDark, focusNodeId }: Props) {
   const T = isDark ? DARK : LIGHT
 
   const svgRef = useRef<SVGSVGElement>(null)
@@ -87,6 +88,21 @@ export function FamilyTreeCanvas({ members: initialMembers, canEdit, isDark }: P
 
     return () => { d3.select(svg).on('.zoom', null) }
   }, [])
+
+  // Pan & zoom to focused search result
+  useEffect(() => {
+    if (focusNodeId == null || !svgRef.current || !zoomRef.current) return
+    const node = nodes.find(n => n.data.id === focusNodeId)
+    if (!node) return
+    const { clientWidth: w, clientHeight: h } = svgRef.current
+    const scale = 1.4
+    d3.select(svgRef.current).transition().duration(500).call(
+      zoomRef.current.transform,
+      d3.zoomIdentity
+        .translate(w / 2 - scale * node.x, h / 2 - scale * node.y)
+        .scale(scale)
+    )
+  }, [focusNodeId, nodes])
 
   function showToast(msg: string, ok = true) {
     setToast({ msg, ok })
@@ -227,6 +243,7 @@ export function FamilyTreeCanvas({ members: initialMembers, canEdit, isDark }: P
               T={T}
               canEdit={canEdit}
               isSelected={selectedId === node.data.id}
+              isFocused={focusNodeId === node.data.id}
               animIndex={i}
               onClick={() => { if (canEdit) setSelectedId(node.data.id) }}
             />
@@ -321,12 +338,13 @@ const HALF_H = NODE_H / 2
 type Theme = typeof DARK
 
 function PersonNode({
-  node, T, canEdit, isSelected, animIndex, onClick,
+  node, T, canEdit, isSelected, isFocused, animIndex, onClick,
 }: {
   node: LayoutNode
   T: Theme
   canEdit: boolean
   isSelected: boolean
+  isFocused: boolean
   animIndex: number
   onClick: () => void
 }) {
@@ -348,6 +366,19 @@ function PersonNode({
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
+        {/* Focus ring (search result) */}
+        {isFocused && (
+          <rect
+            x={-HALF_W - 3} y={-HALF_H - 3}
+            width={NODE_W + 6} height={NODE_H + 6}
+            rx={9} ry={9}
+            fill="none"
+            stroke={T.accent}
+            strokeWidth={2}
+            strokeDasharray="5 3"
+            opacity={0.9}
+          />
+        )}
         {/* Card */}
         <rect
           x={-HALF_W} y={-HALF_H}

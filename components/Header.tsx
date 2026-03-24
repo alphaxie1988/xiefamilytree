@@ -10,9 +10,15 @@ interface Props {
   canEdit: boolean
   isDark: boolean
   onToggleTheme: () => void
+  query: string
+  onQueryChange: (q: string) => void
+  matchCount: number
+  matchIndex: number
+  onPrev: () => void
+  onNext: () => void
 }
 
-export function Header({ user, canEdit, isDark, onToggleTheme }: Props) {
+export function Header({ user, canEdit, isDark, onToggleTheme, query, onQueryChange, matchCount, matchIndex, onPrev, onNext }: Props) {
   const [loading, setLoading] = useState(false)
   const supabase = createClient()
 
@@ -50,6 +56,37 @@ export function Header({ user, canEdit, isDark, onToggleTheme }: Props) {
           </h1>
           <p className="text-xs tracking-widest" style={{ color: muted }}>{SITE_TITLE_EN}</p>
         </div>
+      </div>
+
+      {/* Search */}
+      <div className="flex items-center gap-1 flex-1 max-w-xs mx-3">
+        <div className="relative flex-1">
+          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: muted }}>🔍</span>
+          <input
+            type="text"
+            value={query}
+            onChange={e => onQueryChange(e.target.value)}
+            placeholder="搜尋 Search…"
+            className="w-full pl-7 pr-2 py-1.5 rounded-lg text-xs font-chinese outline-none"
+            style={{
+              background: isDark ? '#1F2937' : '#F1F5F9',
+              border: `1px solid ${isDark ? '#374151' : '#E2E8F0'}`,
+              color: text,
+            }}
+          />
+        </div>
+        {matchCount > 0 && (
+          <>
+            <span className="text-xs shrink-0" style={{ color: muted }}>
+              {matchIndex + 1}/{matchCount}
+            </span>
+            <button onClick={onPrev} className="w-6 h-6 flex items-center justify-center rounded" style={{ color: accent }}>‹</button>
+            <button onClick={onNext} className="w-6 h-6 flex items-center justify-center rounded" style={{ color: accent }}>›</button>
+          </>
+        )}
+        {query.trim() && matchCount === 0 && (
+          <span className="text-xs shrink-0" style={{ color: muted }}>無結果</span>
+        )}
       </div>
 
       {/* Right */}
