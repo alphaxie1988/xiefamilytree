@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Header } from './Header'
 import { FamilyTreeCanvas } from './FamilyTreeCanvas'
 import type { FamilyMember } from '@/lib/types'
 import type { User } from '@supabase/supabase-js'
 import { matchesSearch } from '@/lib/search'
+import { getHiddenIds } from '@/lib/treeUtils'
 
 interface Props {
   members: FamilyMember[]
@@ -34,19 +35,38 @@ export function TreeApp({ members, canEdit, user }: Props) {
     })
   }
 
+  const [collapsedIds, setCollapsedIds] = useState<Set<number>>(() => {
+    try {
+      const saved = localStorage.getItem('collapsed-nodes')
+      return saved ? new Set<number>(JSON.parse(saved)) : new Set()
+    } catch { return new Set() }
+  })
+
+  const toggleCollapse = useCallback((id: number) => {
+    setCollapsedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      try { localStorage.setItem('collapsed-nodes', JSON.stringify(Array.from(next))) } catch {}
+      return next
+    })
+  }, [])
+
   const [query, setQuery] = useState('')
   const [matchIndex, setMatchIndex] = useState(0)
 
   const matchIds = useMemo(() => {
     if (!query.trim()) return []
+    const hiddenIds = getHiddenIds(members, collapsedIds)
     return members
       .filter(m =>
-        matchesSearch(m.line1, query) ||
-        matchesSearch(m.line2, query) ||
-        matchesSearch(m.line3, query)
+        !hiddenIds.has(m.id) &&
+        (matchesSearch(m.line1, query) ||
+         matchesSearch(m.line2, query) ||
+         matchesSearch(m.line3, query))
       )
       .map(m => m.id)
-  }, [members, query])
+  }, [members, query, collapsedIds])
 
   // Reset to first match whenever query changes
   useEffect(() => { setMatchIndex(0) }, [query])
@@ -82,6 +102,8 @@ export function TreeApp({ members, canEdit, user }: Props) {
             canEdit={canEdit}
             isDark={isDark}
             focusNodeId={focusNodeId}
+            collapsedIds={collapsedIds}
+            onToggleCollapse={toggleCollapse}
           />
         )}
       </main>

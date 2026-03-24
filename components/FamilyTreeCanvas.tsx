@@ -3,24 +3,17 @@
 import { useEffect, useRef, useMemo, useState, useCallback } from 'react'
 import * as d3 from 'd3'
 import type { FamilyMember, FamilyMemberUpdate, FamilyMemberInsert } from '@/lib/types'
-import { computeLayout, GEN_NAMES, type LayoutNode, type LayoutLink, NODE_W, NODE_H } from '@/lib/treeUtils'
+import { computeLayout, getHiddenIds, GEN_NAMES, type LayoutNode, type LayoutLink, NODE_W, NODE_H } from '@/lib/treeUtils'
 import { EditModal } from './EditModal'
 
-function getHiddenIds(members: FamilyMember[], collapsedIds: Set<number>): Set<number> {
-  const hidden = new Set<number>()
-  function addDesc(id: number) {
-    const m = members.find(x => x.id === id)
-    m?.refs?.forEach(r => { if (!hidden.has(r)) { hidden.add(r); addDesc(r) } })
-  }
-  collapsedIds.forEach(id => addDesc(id))
-  return hidden
-}
 
 interface Props {
   members: FamilyMember[]
   canEdit: boolean
   isDark: boolean
   focusNodeId?: number | null
+  collapsedIds: Set<number>
+  onToggleCollapse: (id: number) => void
 }
 
 // Theme colour palettes for SVG elements
@@ -68,7 +61,7 @@ const LIGHT = {
   shadowColor:     'rgba(0,0,0,0.28)',
 }
 
-export function FamilyTreeCanvas({ members: initialMembers, canEdit, isDark, focusNodeId }: Props) {
+export function FamilyTreeCanvas({ members: initialMembers, canEdit, isDark, focusNodeId, collapsedIds, onToggleCollapse }: Props) {
   const T = isDark ? DARK : LIGHT
 
   const svgRef = useRef<SVGSVGElement>(null)
@@ -78,12 +71,6 @@ export function FamilyTreeCanvas({ members: initialMembers, canEdit, isDark, foc
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
-  const [collapsedIds, setCollapsedIds] = useState<Set<number>>(() => {
-    try {
-      const saved = localStorage.getItem('collapsed-nodes')
-      return saved ? new Set<number>(JSON.parse(saved)) : new Set()
-    } catch { return new Set() }
-  })
   const [leavingNodes, setLeavingNodes] = useState<LayoutNode[]>([])
   const prevNodesRef = useRef<LayoutNode[]>([])
   const [ready, setReady] = useState(false)
@@ -125,18 +112,6 @@ export function FamilyTreeCanvas({ members: initialMembers, canEdit, isDark, foc
     return () => clearTimeout(t)
   }, [nodes])
 
-  useEffect(() => {
-    try { localStorage.setItem('collapsed-nodes', JSON.stringify(Array.from(collapsedIds))) } catch {}
-  }, [collapsedIds])
-
-  const toggleCollapse = useCallback((id: number) => {
-    setCollapsedIds(prev => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
-  }, [])
 
   // Pan & zoom to focused search result
   useEffect(() => {
@@ -308,7 +283,7 @@ export function FamilyTreeCanvas({ members: initialMembers, canEdit, isDark, foc
               onClick={() => { if (canEdit) setSelectedId(node.data.id) }}
               hasChildren={(node.data.refs?.length ?? 0) > 0}
               isCollapsed={collapsedIds.has(node.data.id)}
-              onToggleCollapse={() => toggleCollapse(node.data.id)}
+              onToggleCollapse={() => onToggleCollapse(node.data.id)}
             />
           ))}
         </g>

@@ -2,6 +2,16 @@ import * as d3 from 'd3'
 import type { FamilyMember } from './types'
 import { NODE_W, NODE_H, GAP_X, GAP_Y } from './constants'
 
+export function getHiddenIds(members: FamilyMember[], collapsedIds: Set<number>): Set<number> {
+  const hidden = new Set<number>()
+  function addDesc(id: number) {
+    const m = members.find(x => x.id === id)
+    m?.refs?.forEach(r => { if (!hidden.has(r)) { hidden.add(r); addDesc(r) } })
+  }
+  collapsedIds.forEach(id => addDesc(id))
+  return hidden
+}
+
 interface TreeMember extends FamilyMember {
   _children: TreeMember[]
 }
