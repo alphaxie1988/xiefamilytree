@@ -86,6 +86,7 @@ export function FamilyTreeCanvas({ members: initialMembers, canEdit, isDark, foc
   })
   const [leavingNodes, setLeavingNodes] = useState<LayoutNode[]>([])
   const prevNodesRef = useRef<LayoutNode[]>([])
+  const [ready, setReady] = useState(false)
 
   const visibleMembers = useMemo(() => {
     const hidden = getHiddenIds(members, collapsedIds)
@@ -108,6 +109,7 @@ export function FamilyTreeCanvas({ members: initialMembers, canEdit, isDark, foc
 
     const { clientWidth: w, clientHeight: h } = svg
     d3.select(svg).call(zoom.transform, d3.zoomIdentity.translate(w / 2, h * 0.08).scale(0.55))
+    setReady(true)
 
     return () => { d3.select(svg).on('.zoom', null) }
   }, [])
@@ -254,6 +256,7 @@ export function FamilyTreeCanvas({ members: initialMembers, canEdit, isDark, foc
       <svg
         ref={svgRef}
         className="absolute inset-0 w-full h-full cursor-grab active:cursor-grabbing"
+        style={{ opacity: ready ? 1 : 0, transition: 'opacity 0.3s ease' }}
         onClick={e => { if (e.target === svgRef.current) setSelectedId(null) }}
       >
         <defs>
