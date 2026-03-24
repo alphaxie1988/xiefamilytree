@@ -1,6 +1,6 @@
 /** Emails allowed to edit the family tree */
 export const AUTHORIZED_EDITORS: string[] = [
-  'alphaxie1988@gmail.com',
+  'alphaxie1988@gmail.com','gracetbe1958@gmail.com'
   // Add more authorized editors here
 ]
 
