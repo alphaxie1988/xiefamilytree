@@ -146,7 +146,7 @@ export function Header({ user, canEdit, isDark, mounted, onToggleTheme, query, o
             }}
           >
             <GoogleIcon />
-            <span>Sign In</span>
+            <span>Admin</span>
           </button>
         )}
         </div>
