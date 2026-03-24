@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import type { FamilyMember, FamilyMemberUpdate, FamilyMemberInsert } from '@/lib/types'
+import { TrashIcon } from './Icons'
 
 interface Props {
   member: FamilyMember
@@ -165,7 +166,7 @@ export function EditModal({ member, canDelete, isDark, onClose, onUpdate, onAddC
                   onClick={() => setConfirmDelete(true)}
                   className="btn-danger text-xs px-3 py-1.5"
                 >
-                  🗑 刪除
+                  <TrashIcon color="#F87171" /> 刪除
                 </button>
               )
             )}

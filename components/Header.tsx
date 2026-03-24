@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { SITE_TITLE_ZH, SITE_TITLE_EN } from '@/lib/constants'
 import type { User } from '@supabase/supabase-js'
+import { SearchIcon, SunIcon, MoonIcon, ChevronLeftIcon, ChevronRightIcon, PencilIcon } from './Icons'
 
 interface Props {
   user: User | null
@@ -44,7 +45,7 @@ export function Header({ user, canEdit, isDark, mounted, onToggleTheme, query, o
   const searchBar = (
     <div className="flex items-center gap-1 flex-1">
       <div className="relative flex-1">
-        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: muted }}>🔍</span>
+        <span className="absolute left-2 top-1/2 -translate-y-1/2 flex items-center"><SearchIcon color={muted} /></span>
         <input
           type="text"
           value={query}
@@ -61,8 +62,8 @@ export function Header({ user, canEdit, isDark, mounted, onToggleTheme, query, o
       {matchCount > 0 && (
         <>
           <span className="text-xs shrink-0" style={{ color: muted }}>{matchIndex + 1}/{matchCount}</span>
-          <button onClick={onPrev} className="w-6 h-6 flex items-center justify-center rounded" style={{ color: accent }}>‹</button>
-          <button onClick={onNext} className="w-6 h-6 flex items-center justify-center rounded" style={{ color: accent }}>›</button>
+          <button onClick={onPrev} className="w-6 h-6 flex items-center justify-center rounded" style={{ color: accent }}><ChevronLeftIcon color={accent} /></button>
+          <button onClick={onNext} className="w-6 h-6 flex items-center justify-center rounded" style={{ color: accent }}><ChevronRightIcon color={accent} /></button>
         </>
       )}
       {query.trim() && matchCount === 0 && (
@@ -105,7 +106,7 @@ export function Header({ user, canEdit, isDark, mounted, onToggleTheme, query, o
             className="text-xs font-chinese rounded-md px-2 py-1 hidden sm:inline"
             style={{ color: accent, background: `${accent}10`, border: `1px solid ${accent}25` }}
           >
-            ✎ 編輯模式
+            <PencilIcon color={accent} /> 編輯模式
           </span>
         )}
 
@@ -121,7 +122,7 @@ export function Header({ user, canEdit, isDark, mounted, onToggleTheme, query, o
             }}
             title={isDark ? 'Light mode' : 'Dark mode'}
           >
-            {isDark ? '☀' : '🌙'}
+            {isDark ? <SunIcon color={isDark ? '#9CA3AF' : '#64748B'} /> : <MoonIcon color={isDark ? '#9CA3AF' : '#64748B'} />}
           </button>
         )}
 

@@ -5,6 +5,7 @@ import * as d3 from 'd3'
 import type { FamilyMember, FamilyMemberUpdate, FamilyMemberInsert } from '@/lib/types'
 import { computeLayout, getHiddenIds, GEN_NAMES, type LayoutNode, type LayoutLink, NODE_W, NODE_H } from '@/lib/treeUtils'
 import { EditModal } from './EditModal'
+import { PlusIcon, MinusIcon, FitIcon } from './Icons'
 
 
 interface Props {
@@ -291,9 +292,9 @@ export function FamilyTreeCanvas({ members: initialMembers, canEdit, isDark, foc
 
       {/* Zoom controls — hidden on mobile, visible on md+ */}
       <div className="hidden md:flex absolute right-4 flex-col gap-2" style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}>
-        <button className="zoom-btn" onClick={zoomIn}  title="Zoom in">＋</button>
-        <button className="zoom-btn" onClick={zoomFit} title="Fit" style={{ fontSize: 13 }}>⊞</button>
-        <button className="zoom-btn" onClick={zoomOut} title="Zoom out">－</button>
+        <button className="zoom-btn" onClick={zoomIn}  title="Zoom in"><PlusIcon /></button>
+        <button className="zoom-btn" onClick={zoomFit} title="Fit"><FitIcon /></button>
+        <button className="zoom-btn" onClick={zoomOut} title="Zoom out"><MinusIcon /></button>
       </div>
 
       {canEdit && (
@@ -473,9 +474,14 @@ function PersonNode({
           style={{ cursor: 'pointer' }}
         >
           <circle cx={0} cy={7} r={8} fill={T.nodeFill} stroke={isCollapsed ? T.accent : T.border} strokeWidth={1.5} />
-          <text x={0} y={11} textAnchor="middle" fontSize={11} fill={isCollapsed ? T.accent : T.text3} fontFamily="Inter, sans-serif" fontWeight="600">
-            {isCollapsed ? '+' : '−'}
-          </text>
+          {isCollapsed ? (
+            <>
+              <line x1={-4} y1={7} x2={4} y2={7} stroke={isCollapsed ? T.accent : T.text3} strokeWidth={1.5} strokeLinecap="round"/>
+              <line x1={0} y1={3} x2={0} y2={11} stroke={isCollapsed ? T.accent : T.text3} strokeWidth={1.5} strokeLinecap="round"/>
+            </>
+          ) : (
+            <line x1={-4} y1={7} x2={4} y2={7} stroke={T.text3} strokeWidth={1.5} strokeLinecap="round"/>
+          )}
         </g>
       )}
     </g>
