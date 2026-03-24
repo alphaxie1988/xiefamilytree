@@ -46,7 +46,7 @@ html.theme-light .canvas-bg, .theme-light .canvas-bg { background: #F1F5F9; }
 .theme-light .site-header {
   background: #FFFFFF;
   border-bottom: 1px solid #E2E8F0;
-  box-shadow: 0 1px 0 rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.06);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.18);
 }
 
 /* ── Modal backdrop ── */
@@ -64,7 +64,7 @@ html.theme-light .canvas-bg, .theme-light .canvas-bg { background: #F1F5F9; }
 .theme-light .edit-modal {
   background: #FFFFFF;
   border: 1px solid #E2E8F0;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05), 0 24px 64px rgba(0,0,0,0.12);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.12), 0 24px 64px rgba(0,0,0,0.25);
 }
 
 @keyframes slideIn {

@@ -55,7 +55,7 @@ const LIGHT = {
   genLabelSel:     'rgba(217,119,6,0.95)',
   connector:       '#64748B',
   glowColor:       '#D97706',
-  shadowColor:     'rgba(0,0,0,0.12)',
+  shadowColor:     'rgba(0,0,0,0.28)',
 }
 
 export function FamilyTreeCanvas({ members: initialMembers, canEdit, isDark, focusNodeId }: Props) {
