@@ -78,7 +78,12 @@ export function FamilyTreeCanvas({ members: initialMembers, canEdit, isDark, foc
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
-  const [collapsedIds, setCollapsedIds] = useState<Set<number>>(new Set())
+  const [collapsedIds, setCollapsedIds] = useState<Set<number>>(() => {
+    try {
+      const saved = localStorage.getItem('collapsed-nodes')
+      return saved ? new Set<number>(JSON.parse(saved)) : new Set()
+    } catch { return new Set() }
+  })
   const [leavingNodes, setLeavingNodes] = useState<LayoutNode[]>([])
   const prevNodesRef = useRef<LayoutNode[]>([])
 
@@ -117,6 +122,10 @@ export function FamilyTreeCanvas({ members: initialMembers, canEdit, isDark, foc
     const t = setTimeout(() => setLeavingNodes([]), 380)
     return () => clearTimeout(t)
   }, [nodes])
+
+  useEffect(() => {
+    try { localStorage.setItem('collapsed-nodes', JSON.stringify(Array.from(collapsedIds))) } catch {}
+  }, [collapsedIds])
 
   const toggleCollapse = useCallback((id: number) => {
     setCollapsedIds(prev => {

@@ -9,6 +9,7 @@ interface Props {
   user: User | null
   canEdit: boolean
   isDark: boolean
+  mounted: boolean
   onToggleTheme: () => void
   query: string
   onQueryChange: (q: string) => void
@@ -18,7 +19,7 @@ interface Props {
   onNext: () => void
 }
 
-export function Header({ user, canEdit, isDark, onToggleTheme, query, onQueryChange, matchCount, matchIndex, onPrev, onNext }: Props) {
+export function Header({ user, canEdit, isDark, mounted, onToggleTheme, query, onQueryChange, matchCount, matchIndex, onPrev, onNext }: Props) {
   const [loading, setLoading] = useState(false)
   const supabase = createClient()
 
@@ -90,10 +91,12 @@ export function Header({ user, canEdit, isDark, onToggleTheme, query, onQueryCha
           </div>
         </div>
 
-        {/* Search — inline on md+ */}
-        <div className="hidden md:flex flex-1 max-w-xs mx-4">
-          {searchBar}
-        </div>
+        {/* Search — inline on md+, only after theme is known */}
+        {mounted && (
+          <div className="hidden md:flex flex-1 max-w-xs mx-4">
+            {searchBar}
+          </div>
+        )}
 
         {/* Right */}
         <div className="flex items-center gap-2">
@@ -106,19 +109,21 @@ export function Header({ user, canEdit, isDark, onToggleTheme, query, onQueryCha
           </span>
         )}
 
-        {/* Theme toggle */}
-        <button
-          onClick={onToggleTheme}
-          className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
-          style={{
-            background: isDark ? '#1F2937' : '#F1F5F9',
-            border: `1px solid ${isDark ? '#374151' : '#E2E8F0'}`,
-            color: isDark ? '#9CA3AF' : '#64748B',
-          }}
-          title={isDark ? 'Light mode' : 'Dark mode'}
-        >
-          {isDark ? '☀' : '🌙'}
-        </button>
+        {/* Theme toggle — only after theme is known to avoid flicker */}
+        {mounted && (
+          <button
+            onClick={onToggleTheme}
+            className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
+            style={{
+              background: isDark ? '#1F2937' : '#F1F5F9',
+              border: `1px solid ${isDark ? '#374151' : '#E2E8F0'}`,
+              color: isDark ? '#9CA3AF' : '#64748B',
+            }}
+            title={isDark ? 'Light mode' : 'Dark mode'}
+          >
+            {isDark ? '☀' : '🌙'}
+          </button>
+        )}
 
         {user ? (
           <div className="flex items-center gap-2">
@@ -142,10 +147,12 @@ export function Header({ user, canEdit, isDark, onToggleTheme, query, onQueryCha
         </div>
       </div>
 
-      {/* Search — separate row on mobile */}
-      <div className="md:hidden px-4 pb-2.5">
-        {searchBar}
-      </div>
+      {/* Search — separate row on mobile, only after theme is known */}
+      {mounted && (
+        <div className="md:hidden px-4 pb-2.5">
+          {searchBar}
+        </div>
+      )}
     </header>
   )
 }

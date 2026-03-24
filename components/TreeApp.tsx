@@ -66,6 +66,7 @@ export function TreeApp({ members, canEdit, user }: Props) {
         user={user}
         canEdit={canEdit}
         isDark={isDark}
+        mounted={mounted}
         onToggleTheme={toggleTheme}
         query={query}
         onQueryChange={setQuery}
