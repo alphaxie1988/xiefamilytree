@@ -46,10 +46,18 @@ export function computeLayout(members: FamilyMember[]): {
   const rootMember = members.find(m => !childIds.has(m.id))
   if (!rootMember) return { nodes: [], links: [] }
 
-  // Build D3 hierarchy
+  // Build D3 hierarchy — deduplicate so a child with two parents is only placed once
+  const visitedInHierarchy = new Set<number>([rootMember.id])
   const root = d3.hierarchy<TreeMember>(
     map.get(rootMember.id)!,
-    d => (d._children.length > 0 ? d._children : null)
+    d => {
+      const unique = d._children.filter(c => {
+        if (visitedInHierarchy.has(c.id)) return false
+        visitedInHierarchy.add(c.id)
+        return true
+      })
+      return unique.length > 0 ? unique : null
+    }
   )
 
   // Apply tree layout
