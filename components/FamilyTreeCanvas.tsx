@@ -391,20 +391,20 @@ function splitAtParen(text: string): [string, string | null] {
 }
 
 function NodeText({ data, T }: { data: FamilyMember; T: Theme }) {
-  type Row = { text: string; fill: string; size: number }
+  type Row = { text: string; fill: string; size: number; weight: string }
 
-  function makeRows(raw: string | null, fill: string, dateColor: string): Row[] {
+  function makeRows(raw: string | null, fill: string, dateColor: string, mainWeight: string): Row[] {
     if (!raw) return []
     const [main, paren] = splitAtParen(raw)
-    const rows: Row[] = [{ text: clip(main, 13), fill, size: adaptSize(main, 14) }]
-    if (paren) rows.push({ text: clip(paren, 15), fill: dateColor, size: 11 })
+    const rows: Row[] = [{ text: clip(main, 13), fill, size: adaptSize(main, 14), weight: mainWeight }]
+    if (paren) rows.push({ text: clip(paren, 15), fill: dateColor, size: 11, weight: '400' })
     return rows
   }
 
   const rows: Row[] = [
-    ...makeRows(data.line1, data.line1 === '-' ? `${T.text1}33` : T.text1, T.textDate),
-    ...makeRows(data.line2, T.text2, T.textDate),
-    ...makeRows(data.line3, T.text3, T.textDate),
+    ...makeRows(data.line1, data.line1 === '-' ? `${T.text1}33` : T.text1, T.textDate, '700'),
+    ...makeRows(data.line2, T.text2, T.textDate, '600'),
+    ...makeRows(data.line3, T.text3, T.textDate, '600'),
   ]
 
   const GAP = 2
@@ -422,7 +422,7 @@ function NodeText({ data, T }: { data: FamilyMember; T: Theme }) {
             fontSize={row.size}
             fill={row.fill}
             fontFamily="Noto Serif SC, Inter, sans-serif"
-            fontWeight={i === 0 ? '700' : '500'}
+            fontWeight={row.weight}
           >
             {row.text}
           </text>
