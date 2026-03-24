@@ -40,57 +40,63 @@ export function Header({ user, canEdit, isDark, onToggleTheme, query, onQueryCha
     location.reload()
   }
 
+  const searchBar = (
+    <div className="flex items-center gap-1 flex-1">
+      <div className="relative flex-1">
+        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: muted }}>🔍</span>
+        <input
+          type="text"
+          value={query}
+          onChange={e => onQueryChange(e.target.value)}
+          placeholder="搜尋 Search…"
+          className="w-full pl-7 pr-2 py-1.5 rounded-lg text-xs font-chinese outline-none"
+          style={{
+            background: isDark ? '#1F2937' : '#F1F5F9',
+            border: `1px solid ${isDark ? '#374151' : '#E2E8F0'}`,
+            color: text,
+          }}
+        />
+      </div>
+      {matchCount > 0 && (
+        <>
+          <span className="text-xs shrink-0" style={{ color: muted }}>{matchIndex + 1}/{matchCount}</span>
+          <button onClick={onPrev} className="w-6 h-6 flex items-center justify-center rounded" style={{ color: accent }}>‹</button>
+          <button onClick={onNext} className="w-6 h-6 flex items-center justify-center rounded" style={{ color: accent }}>›</button>
+        </>
+      )}
+      {query.trim() && matchCount === 0 && (
+        <span className="text-xs shrink-0" style={{ color: muted }}>無結果</span>
+      )}
+    </div>
+  )
+
   return (
-    <header className="site-header flex items-center justify-between px-4 py-2.5 shrink-0">
-      {/* Left: Mark + Title */}
-      <div className="flex items-center gap-3">
-        <div
-          className="flex items-center justify-center w-8 h-8 rounded-lg"
-          style={{ background: `${accent}18`, border: `1px solid ${accent}30` }}
-        >
-          <span className="font-chinese font-semibold text-sm leading-none" style={{ color: accent }}>谢</span>
+    <header className="site-header shrink-0">
+      {/* Top row */}
+      <div className="flex items-center justify-between px-4 py-2.5">
+        {/* Left: Mark + Title */}
+        <div className="flex items-center gap-3">
+          <div
+            className="flex items-center justify-center w-8 h-8 rounded-lg"
+            style={{ background: `${accent}18`, border: `1px solid ${accent}30` }}
+          >
+            <span className="font-chinese font-semibold text-sm leading-none" style={{ color: accent }}>谢</span>
+          </div>
+          <div>
+            <h1 className="font-chinese font-semibold text-base leading-tight tracking-wide" style={{ color: text }}>
+              {SITE_TITLE_ZH}
+            </h1>
+            <p className="text-xs tracking-widest" style={{ color: muted }}>{SITE_TITLE_EN}</p>
+          </div>
         </div>
-        <div>
-          <h1 className="font-chinese font-semibold text-base leading-tight tracking-wide" style={{ color: text }}>
-            {SITE_TITLE_ZH}
-          </h1>
-          <p className="text-xs tracking-widest" style={{ color: muted }}>{SITE_TITLE_EN}</p>
-        </div>
-      </div>
 
-      {/* Search */}
-      <div className="flex items-center gap-1 flex-1 max-w-xs mx-3">
-        <div className="relative flex-1">
-          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: muted }}>🔍</span>
-          <input
-            type="text"
-            value={query}
-            onChange={e => onQueryChange(e.target.value)}
-            placeholder="搜尋 Search…"
-            className="w-full pl-7 pr-2 py-1.5 rounded-lg text-xs font-chinese outline-none"
-            style={{
-              background: isDark ? '#1F2937' : '#F1F5F9',
-              border: `1px solid ${isDark ? '#374151' : '#E2E8F0'}`,
-              color: text,
-            }}
-          />
+        {/* Search — inline on md+ */}
+        <div className="hidden md:flex flex-1 max-w-xs mx-4">
+          {searchBar}
         </div>
-        {matchCount > 0 && (
-          <>
-            <span className="text-xs shrink-0" style={{ color: muted }}>
-              {matchIndex + 1}/{matchCount}
-            </span>
-            <button onClick={onPrev} className="w-6 h-6 flex items-center justify-center rounded" style={{ color: accent }}>‹</button>
-            <button onClick={onNext} className="w-6 h-6 flex items-center justify-center rounded" style={{ color: accent }}>›</button>
-          </>
-        )}
-        {query.trim() && matchCount === 0 && (
-          <span className="text-xs shrink-0" style={{ color: muted }}>無結果</span>
-        )}
-      </div>
 
-      {/* Right */}
-      <div className="flex items-center gap-2">
+        {/* Right */}
+        <div className="flex items-center gap-2">
         {canEdit && (
           <span
             className="text-xs font-chinese rounded-md px-2 py-1 hidden sm:inline"
@@ -133,6 +139,12 @@ export function Header({ user, canEdit, isDark, onToggleTheme, query, onQueryCha
             <span>Sign In</span>
           </button>
         )}
+        </div>
+      </div>
+
+      {/* Search — separate row on mobile */}
+      <div className="md:hidden px-4 pb-2.5">
+        {searchBar}
       </div>
     </header>
   )
