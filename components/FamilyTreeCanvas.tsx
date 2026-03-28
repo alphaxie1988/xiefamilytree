@@ -501,8 +501,8 @@ function NodeText({ data, T }: { data: FamilyMember; T: Theme }) {
   function makeRows(raw: string | null, fill: string, dateColor: string, mainWeight: string): Row[] {
     if (!raw) return []
     const [main, paren] = splitAtParen(raw)
-    const rows: Row[] = [{ text: clip(main, 13), fill, size: adaptSize(main, 14), weight: mainWeight }]
-    if (paren) rows.push({ text: clip(paren, 15), fill: dateColor, size: 11, weight: '400' })
+    const rows: Row[] = [{ text: main, fill, size: adaptSize(main, 14), weight: mainWeight }]
+    if (paren) rows.push({ text: paren, fill: dateColor, size: adaptSize(paren, 11), weight: '400' })
     return rows
   }
 
