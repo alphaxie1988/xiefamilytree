@@ -67,4 +67,5 @@ CREATE POLICY "public read"
 -- (Application layer further restricts to existing admins)
 CREATE POLICY "auth write"
   ON admins FOR ALL
-  USING (auth.role() = 'authenticated');
+  USING (auth.uid() IS NOT NULL)
+  WITH CHECK (auth.uid() IS NOT NULL);

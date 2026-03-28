@@ -512,13 +512,13 @@ function NodeText({ data, T }: { data: FamilyMember; T: Theme }) {
     ...makeRows(data.line3, T.text1, T.textDate, '700'),
   ]
 
-  const GAP = 2
+  const LINE_HEIGHT = 16
   let y = -HALF_H + 16 + (rows[0]?.size ?? 14)
 
   return (
     <>
       {rows.map((row, i) => {
-        const baseline = i === 0 ? y : (y += GAP + row.size, y)
+        const baseline = i === 0 ? y : (y += LINE_HEIGHT, y)
         return (
           <text
             key={i}
