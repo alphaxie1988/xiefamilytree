@@ -19,9 +19,10 @@ interface Props {
   matchIndex: number
   onPrev: () => void
   onNext: () => void
+  lastUpdated?: string | null
 }
 
-export function Header({ user, canEdit, isDark, mounted, onToggleTheme, query, onQueryChange, matchCount, matchIndex, onPrev, onNext }: Props) {
+export function Header({ user, canEdit, isDark, mounted, onToggleTheme, query, onQueryChange, matchCount, matchIndex, onPrev, onNext, lastUpdated }: Props) {
   const [loading, setLoading] = useState(false)
   const [showAdminModal, setShowAdminModal] = useState(false)
   const supabase = createClient()
@@ -83,7 +84,9 @@ export function Header({ user, canEdit, isDark, mounted, onToggleTheme, query, o
           <div
             className="flex items-center justify-center w-8 h-8 rounded-lg"
             style={{ background: `${accent}18`, border: `1px solid ${accent}30` }}
-            title="v1.0.1"
+            title={lastUpdated
+              ? `v1.0.1\nLast updated: ${new Date(lastUpdated).toLocaleString()}`
+              : 'v1.0.1'}
           >
             <span className="font-chinese font-semibold text-sm leading-none" style={{ color: accent }}>谢</span>
           </div>

@@ -14,9 +14,19 @@ interface Props {
   user: User | null
 }
 
+function computeLastUpdated(members: FamilyMember[]): string | null {
+  let latest: string | null = null
+  for (const m of members) {
+    const t = m.updated_at ?? m.created_at ?? null
+    if (t && (!latest || t > latest)) latest = t
+  }
+  return latest
+}
+
 export function TreeApp({ members, canEdit, user }: Props) {
   const [mounted, setMounted] = useState(false)
   const [isDark, setIsDark] = useState(true)
+  const [lastUpdated, setLastUpdated] = useState<string | null>(() => computeLastUpdated(members))
 
   useEffect(() => {
     setIsDark(!document.documentElement.classList.contains('theme-light'))
@@ -94,6 +104,7 @@ export function TreeApp({ members, canEdit, user }: Props) {
         matchIndex={matchIndex}
         onPrev={handlePrev}
         onNext={handleNext}
+        lastUpdated={lastUpdated}
       />
       <main className="flex-1 relative overflow-hidden">
         {mounted && (
@@ -104,6 +115,7 @@ export function TreeApp({ members, canEdit, user }: Props) {
             focusNodeId={focusNodeId}
             collapsedIds={collapsedIds}
             onToggleCollapse={toggleCollapse}
+            onLastUpdated={setLastUpdated}
           />
         )}
       </main>

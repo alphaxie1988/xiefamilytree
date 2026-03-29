@@ -15,6 +15,7 @@ interface Props {
   focusNodeId?: number | null
   collapsedIds: Set<number>
   onToggleCollapse: (id: number) => void
+  onLastUpdated?: (ts: string) => void
 }
 
 // Theme colour palettes for SVG elements
@@ -62,7 +63,7 @@ const LIGHT = {
   shadowColor:     'rgba(0,0,0,0.28)',
 }
 
-export function FamilyTreeCanvas({ members: initialMembers, canEdit, isDark, focusNodeId, collapsedIds, onToggleCollapse }: Props) {
+export function FamilyTreeCanvas({ members: initialMembers, canEdit, isDark, focusNodeId, collapsedIds, onToggleCollapse, onLastUpdated }: Props) {
   const T = isDark ? DARK : LIGHT
 
   const svgRef = useRef<SVGSVGElement>(null)
@@ -145,6 +146,7 @@ export function FamilyTreeCanvas({ members: initialMembers, canEdit, isDark, foc
       if (!res.ok) throw new Error(await res.text())
       const updated: FamilyMember = await res.json()
       setMembers(prev => prev.map(m => m.id === id ? updated : m))
+      onLastUpdated?.(updated.updated_at ?? new Date().toISOString())
       showToast('已儲存 Saved')
     } catch {
       showToast('儲存失敗 Save failed', false)
@@ -175,6 +177,7 @@ export function FamilyTreeCanvas({ members: initialMembers, canEdit, isDark, foc
       const updatedParent: FamilyMember = await patchRes.json()
 
       setMembers(prev => [...prev.map(m => m.id === parentId ? updatedParent : m), created])
+      onLastUpdated?.(created.created_at ?? new Date().toISOString())
       showToast('已新增 Added')
     } catch {
       showToast('新增失敗 Add failed', false)
@@ -193,6 +196,7 @@ export function FamilyTreeCanvas({ members: initialMembers, canEdit, isDark, foc
         .map(m => ({ ...m, refs: m.refs ? m.refs.filter(r => r !== id) : null }))
       )
       setSelectedId(null)
+      onLastUpdated?.(new Date().toISOString())
       showToast('已刪除 Deleted')
     } catch {
       showToast('刪除失敗 Delete failed', false)
